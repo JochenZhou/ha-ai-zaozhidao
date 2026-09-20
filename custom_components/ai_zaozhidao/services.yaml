@@ -1,0 +1,24 @@
+play:
+  name: 播放最新一期
+  description: 播放当天那一期；若当天还没有更新，则发送提醒而不播放。
+  fields:
+    title:
+      name: 期号标题
+      description: 可选。指定要播放的完整标题（如 AI早知道-26-09-20），留空则播放当天那一期。
+      example: AI早知道-26-09-20
+      selector:
+        text:
+    entry_id:
+      name: 配置条目
+      description: 可选。多条目时指定要操作哪一个。
+      selector:
+        text:
+refresh:
+  name: 立即刷新
+  description: 立刻重新抓取播客列表，更新实体状态。
+  fields:
+    entry_id:
+      name: 配置条目
+      description: 可选。多条目时指定要操作哪一个。
+      selector:
+        text:

@@ -1,0 +1,11 @@
+{
+  "domain": "ai_zaozhidao",
+  "name": "AI早知道播客",
+  "version": "0.1.0",
+  "config_flow": true,
+  "documentation": "https://github.com/JochenZhou/ha-ai-zaozhidao",
+  "issue_tracker": "https://github.com/JochenZhou/ha-ai-zaozhidao/issues",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "codeowners": ["@JochenZhou"]
+}

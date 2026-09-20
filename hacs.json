@@ -1,0 +1,6 @@
+{
+  "name": "AI早知道播客",
+  "country": ["CN"],
+  "homeassistant": "2024.6.0",
+  "render_readme": true
+}
