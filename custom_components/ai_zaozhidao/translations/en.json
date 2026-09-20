@@ -14,7 +14,7 @@
         },
         "data_description": {
           "podcast": "Full 小宇宙 podcast URL or the 24-character podcast ID.",
-          "title_prefix": "Episode titles are matched as <prefix>-YY-MM-DD. Default: AI早知道.",
+          "title_prefix": "Episode titles are matched as the prefix plus -YY-MM-DD. Default: AI早知道.",
           "media_player": "The speaker that should play the episode.",
           "notify_service": "Optional, e.g. notify.wework — used when today's episode is not published yet.",
           "notify_target": "Optional. Target/recipient passed to the notify service.",
