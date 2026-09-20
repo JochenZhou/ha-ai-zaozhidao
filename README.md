@@ -1,5 +1,8 @@
 # AI早知道播客（Home Assistant 自定义集成）
 
+[![一键添加到 HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=JochenZhou&repository=ha-ai-zaozhidao&category=integration)
+[![打开 Home Assistant 添加集成](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=ai_zaozhidao)
+
 抓取小宇宙播客《AI早知道》**当天那一期**，播放到指定的 `media_player`。
 当天还没更新时只发提醒、不播放。
 
@@ -12,7 +15,19 @@
 - 提供实体：最新一期标题 / 日期、今日是否已更新、一键播放按钮
 - 播放前可选择固定音量，或保持音箱当前音量不变
 
-## 安装（HACS）
+## 安装
+
+### 一键添加（推荐）
+
+点顶部第一个徽章 **“一键添加到 HACS”**，浏览器会跳转到你的 HA 并打开本仓库的 HACS 页面，
+确认添加即可。之后在 HACS 里搜索「AI早知道播客」下载，然后**重启 Home Assistant**。
+
+> 一键按钮需要：已在 HA 里装好 HACS，且用能访问你 HA 地址的浏览器打开。
+> 如果你的 HA 不在 `http://homeassistant.local:8123`，会先让你填一次地址。
+
+装好并重启后，点顶部第二个徽章 **“打开 Home Assistant 添加集成”** 直接进入配置页面。
+
+### 手动添加
 
 1. HACS → 右上角 ⋮ → **自定义存储库**
 2. 仓库填 `https://github.com/JochenZhou/ha-ai-zaozhidao`，类别选 **集成（Integration）**
@@ -20,7 +35,7 @@
 4. **重启 Home Assistant**
 5. 设置 → 设备与服务 → 添加集成 → 搜索「AI早知道播客」
 
-## 手动安装
+### 完全手动安装
 
 把 `custom_components/ai_zaozhidao/` 整个目录拷到 HA 配置目录下的
 `custom_components/ai_zaozhidao/`，重启 HA。
