@@ -10,7 +10,10 @@
           "media_player": "Target media player",
           "notify_service": "Notify service",
           "notify_target": "Notify target",
-          "volume": "Volume before playing"
+          "volume": "Volume before playing",
+          "ringtone_enabled": "Play a ringtone before the episode",
+          "ringtone_file": "Custom ringtone file path",
+          "speed": "Playback speed"
         },
         "data_description": {
           "podcast": "Full 小宇宙 podcast URL or the 24-character podcast ID.",
@@ -18,7 +21,10 @@
           "media_player": "The speaker that should play the episode.",
           "notify_service": "Optional, e.g. notify.wework — used when today's episode is not published yet.",
           "notify_target": "Optional. Target/recipient passed to the notify service.",
-          "volume": "Optional. 0 = leave the speaker volume unchanged."
+          "volume": "Optional. 0 = leave the speaker volume unchanged.",
+          "ringtone_enabled": "Off by default. When on, a ringtone is prepended before the episode (the built-in Morning alarm ringtone, no volume change). Requires ffmpeg in the HA container.",
+          "ringtone_file": "Optional absolute path to your own audio file (inside the HA container), e.g. /config/local/my-ring.mp3. Leave empty to use the built-in ringtone.",
+          "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed."
         }
       },
       "reconfigure": {
@@ -30,7 +36,10 @@
           "media_player": "Target media player",
           "notify_service": "Notify service",
           "notify_target": "Notify target",
-          "volume": "Volume before playing"
+          "volume": "Volume before playing",
+          "ringtone_enabled": "Play a ringtone before the episode",
+          "ringtone_file": "Custom ringtone file path",
+          "speed": "Playback speed"
         }
       }
     },
@@ -55,7 +64,10 @@
           "media_player": "Target media player",
           "notify_service": "Notify service",
           "notify_target": "Notify target",
-          "volume": "Volume before playing"
+          "volume": "Volume before playing",
+          "ringtone_enabled": "Play a ringtone before the episode",
+          "ringtone_file": "Custom ringtone file path",
+          "speed": "Playback speed"
         }
       }
     }

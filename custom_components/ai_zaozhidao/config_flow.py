@@ -18,9 +18,15 @@ from .const import (
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TARGET,
     CONF_PODCAST,
+    CONF_RINGTONE_ENABLED,
+    CONF_RINGTONE_FILE,
+    CONF_SPEED,
     CONF_TITLE_PREFIX,
     CONF_VOLUME,
     DEFAULT_PODCAST,
+    DEFAULT_RINGTONE_ENABLED,
+    DEFAULT_RINGTONE_FILE,
+    DEFAULT_SPEED,
     DEFAULT_TITLE_PREFIX,
     DOMAIN,
 )
@@ -41,6 +47,12 @@ def _normalize(user_input: dict) -> dict:
         values[CONF_PODCAST] = podcast_id
     values[CONF_NOTIFY_SERVICE] = (values.get(CONF_NOTIFY_SERVICE) or "").strip()
     values[CONF_NOTIFY_TARGET] = (values.get(CONF_NOTIFY_TARGET) or "").strip()
+    values[CONF_RINGTONE_FILE] = (values.get(CONF_RINGTONE_FILE) or "").strip()
+    try:
+        values[CONF_SPEED] = round(float(values.get(CONF_SPEED) or DEFAULT_SPEED), 2)
+    except (TypeError, ValueError):
+        values[CONF_SPEED] = DEFAULT_SPEED
+    values[CONF_RINGTONE_ENABLED] = bool(values.get(CONF_RINGTONE_ENABLED, DEFAULT_RINGTONE_ENABLED))
     return values
 
 
@@ -72,6 +84,20 @@ def _schema(defaults: dict | None = None) -> vol.Schema:
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0, max=1, step=0.01, mode=selector.NumberSelectorMode.BOX
+                )
+            ),
+            vol.Optional(
+                CONF_RINGTONE_ENABLED, default=d.get(CONF_RINGTONE_ENABLED, DEFAULT_RINGTONE_ENABLED)
+            ): selector.BooleanSelector(),
+            vol.Optional(
+                CONF_RINGTONE_FILE,
+                description={"suggested_value": d.get(CONF_RINGTONE_FILE, DEFAULT_RINGTONE_FILE)},
+            ): selector.TextSelector(),
+            vol.Optional(
+                CONF_SPEED, default=d.get(CONF_SPEED, DEFAULT_SPEED)
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.5, max=3.0, step=0.05, mode=selector.NumberSelectorMode.BOX
                 )
             ),
         }

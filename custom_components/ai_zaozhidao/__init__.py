@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
@@ -21,15 +22,22 @@ from .const import (
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TARGET,
     CONF_PODCAST,
+    CONF_RINGTONE_ENABLED,
+    CONF_RINGTONE_FILE,
+    CONF_SPEED,
     CONF_TITLE_PREFIX,
     CONF_VOLUME,
     DEFAULT_PODCAST,
+    DEFAULT_RINGTONE_ENABLED,
+    DEFAULT_RINGTONE_FILE,
+    DEFAULT_SPEED,
     DEFAULT_TITLE_PREFIX,
     DOMAIN,
     SERVICE_PLAY,
     SERVICE_REFRESH,
 )
 from .coordinator import AiZaoZhiDaoCoordinator
+from .processor import ProcessError, build_processed_audio, ringtone_asset_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -83,6 +91,37 @@ async def _async_notify(hass: HomeAssistant, data: dict, title: str, message: st
         _LOGGER.warning("调用通知服务 %s 失败: %s", service, err)
 
 
+async def _resolve_media_url(hass: HomeAssistant, data: dict, episode) -> str:
+    """按配置决定播放地址：开了铃声/变速就先合成，否则直接用源 URL。"""
+    ringtone_enabled = bool(data.get(CONF_RINGTONE_ENABLED, DEFAULT_RINGTONE_ENABLED))
+    speed = float(data.get(CONF_SPEED) or DEFAULT_SPEED)
+    ringtone_path: Path | None = None
+    if ringtone_enabled:
+        custom = str(data.get(CONF_RINGTONE_FILE) or "").strip()
+        if custom:
+            ringtone_path = Path(custom)
+            if not ringtone_path.is_file():
+                raise HomeAssistantError(f"自定义铃声文件不存在: {custom}")
+        else:
+            ringtone_path = ringtone_asset_path()
+            if not ringtone_path.is_file():
+                raise HomeAssistantError(f"集成自带铃声缺失: {ringtone_path}")
+
+    if ringtone_path is None and abs(speed - 1.0) <= 1e-6:
+        return episode.url
+
+    try:
+        return await build_processed_audio(
+            hass,
+            episode.url,
+            ringtone_path=ringtone_path,
+            speed=speed,
+            title=episode.title,
+        )
+    except ProcessError as err:
+        raise HomeAssistantError(f"音频合成失败: {err}") from err
+
+
 async def async_play(
     hass: HomeAssistant,
     data: dict,
@@ -107,6 +146,8 @@ async def async_play(
             raise HomeAssistantError(message)
         return message
 
+    media_url = await _resolve_media_url(hass, data, episode)
+
     volume = data.get("volume") or 0
     if volume and float(volume) > 0:
         await hass.services.async_call(
@@ -121,12 +162,12 @@ async def async_play(
         "play_media",
         {
             "entity_id": media_player,
-            "media_content_id": episode.url,
+            "media_content_id": media_url,
             "media_content_type": "music",
         },
         blocking=True,
     )
-    _LOGGER.info("已播放 %s -> %s", episode.title, media_player)
+    _LOGGER.info("已播放 %s -> %s (%s)", episode.title, media_player, media_url)
     return f"已播放 {episode.title}"
 
 
@@ -171,6 +212,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "notify_service": cfg.get(CONF_NOTIFY_SERVICE) or "",
         "notify_target": cfg.get(CONF_NOTIFY_TARGET) or "",
         "volume": cfg.get(CONF_VOLUME) or 0,
+        CONF_RINGTONE_ENABLED: bool(cfg.get(CONF_RINGTONE_ENABLED, DEFAULT_RINGTONE_ENABLED)),
+        CONF_RINGTONE_FILE: cfg.get(CONF_RINGTONE_FILE) or DEFAULT_RINGTONE_FILE,
+        CONF_SPEED: float(cfg.get(CONF_SPEED) or DEFAULT_SPEED),
     }
 
     await coordinator.async_config_entry_first_refresh()
