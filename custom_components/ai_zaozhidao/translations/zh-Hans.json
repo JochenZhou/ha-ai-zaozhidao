@@ -16,14 +16,14 @@
           "speed": "播放倍速"
         },
         "data_description": {
-          "podcast": "小宇宙播客完整链接，或 24 位播客 ID。",
-          "title_prefix": "期号按「前缀-YY-MM-DD」匹配，默认 AI早知道。",
-          "media_player": "用来播放这一期的音箱或播放器。",
-          "notify_service": "可选，例如 notify.wework；当天还没更新时用它发提醒。",
+          "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
+          "title_prefix": "期号按「前缀-YY-MM-DD」精确匹配当天那一期。",
+          "media_player": "播放到哪台音箱/播放器。",
+          "notify_service": "可选，如 notify.wework —— 当天还没更新时用它发提醒。",
           "notify_target": "可选，传给提醒服务的目标/接收人。",
-          "volume": "可选，0 表示不修改音箱当前音量。",
-          "ringtone_enabled": "默认关闭。开启后在正片前先播放铃声（内置 Morning 铃声，音量不变）。需要 HA 容器内安装 ffmpeg。",
-          "ringtone_file": "可选，HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空则使用内置铃声。",
+          "volume": "播放前先把音箱音量调到该值；0 = 不修改音箱当前音量。",
+          "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
+          "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
           "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。"
         }
       },
@@ -40,6 +40,17 @@
           "ringtone_enabled": "播放前先响一段铃声",
           "ringtone_file": "自定义铃声文件路径",
           "speed": "播放倍速"
+        },
+        "data_description": {
+          "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
+          "title_prefix": "期号按「前缀-YY-MM-DD」精确匹配当天那一期。",
+          "media_player": "播放到哪台音箱/播放器。",
+          "notify_service": "可选，如 notify.wework —— 当天还没更新时用它发提醒。",
+          "notify_target": "可选，传给提醒服务的目标/接收人。",
+          "volume": "播放前先把音箱音量调到该值；0 = 不修改音箱当前音量。",
+          "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
+          "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
+          "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。"
         }
       }
     },
@@ -68,6 +79,17 @@
           "ringtone_enabled": "播放前先响一段铃声",
           "ringtone_file": "自定义铃声文件路径",
           "speed": "播放倍速"
+        },
+        "data_description": {
+          "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
+          "title_prefix": "期号按「前缀-YY-MM-DD」精确匹配当天那一期。",
+          "media_player": "播放到哪台音箱/播放器。",
+          "notify_service": "可选，如 notify.wework —— 当天还没更新时用它发提醒。",
+          "notify_target": "可选，传给提醒服务的目标/接收人。",
+          "volume": "播放前先把音箱音量调到该值；0 = 不修改音箱当前音量。",
+          "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
+          "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
+          "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。"
         }
       }
     }
