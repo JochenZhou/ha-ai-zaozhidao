@@ -10,6 +10,7 @@ import asyncio
 import hashlib
 import logging
 import shutil
+import time
 from pathlib import Path
 
 from homeassistant.core import HomeAssistant
@@ -23,6 +24,8 @@ MAX_SPEED = 3.0
 RINGTONE_FADE_SECONDS = 2.5
 GAP_SECONDS = 0.5
 _PROC_TIMEOUT = 300
+# 合成结果保留时长：超过后视为过期，下次合成/启动时删除
+RETENTION_SECONDS = 24 * 3600
 
 
 class ProcessError(Exception):
@@ -79,7 +82,7 @@ async def _download(hass: HomeAssistant, url: str, dest: Path) -> None:
         raise
     except Exception as err:  # noqa: BLE001
         raise ProcessError(f"下载源音频失败: {err}") from err
-    dest.write_bytes(data)
+    await asyncio.get_running_loop().run_in_executor(None, dest.write_bytes, data)
 
 
 async def _run_ffmpeg(
@@ -142,6 +145,27 @@ async def _run_ffmpeg(
         raise ProcessError(f"ffmpeg 合成失败: {stderr.decode(errors='ignore')[:300]}")
 
 
+def cleanup_expired(hass: HomeAssistant, keep: Path | None = None) -> int:
+    """删除过期（>1 天）的合成音频，保留 keep 指定文件。返回删除数。"""
+    out_dir = output_dir(hass)
+    if not out_dir.is_dir():
+        return 0
+    now = time.time()
+    removed = 0
+    for f in out_dir.iterdir():
+        if not f.is_file() or f == keep:
+            continue
+        try:
+            if now - f.stat().st_mtime > RETENTION_SECONDS:
+                f.unlink()
+                removed += 1
+        except OSError as err:
+            _LOGGER.warning("清理过期音频失败 %s: %s", f.name, err)
+    if removed:
+        _LOGGER.info("已清理 %d 个过期合成音频", removed)
+    return removed
+
+
 async def build_processed_audio(
     hass: HomeAssistant,
     source_url: str,
@@ -163,6 +187,8 @@ async def build_processed_audio(
     out_name = f"{safe_title}_{digest}.m4a"
     out_path = out_dir / out_name
     if out_path.exists() and out_path.stat().st_size > 0:
+        # 缓存命中也顺带清理过期文件（不删自己）
+        await hass.async_add_executor_job(cleanup_expired, hass, out_path)
         return f"/local/{OUTPUT_DIRNAME}/{out_name}"
 
     src = out_dir / f".src_{digest}.m4a"
@@ -172,5 +198,7 @@ async def build_processed_audio(
     finally:
         src.unlink(missing_ok=True)
 
+    # 合成完成后清理过期文件（不删刚生成的）
+    await hass.async_add_executor_job(cleanup_expired, hass, out_path)
     _LOGGER.info("音频合成完成: %s (铃声=%s, 倍速=%.2f)", out_name, bool(ringtone_path), speed)
     return f"/local/{OUTPUT_DIRNAME}/{out_name}"

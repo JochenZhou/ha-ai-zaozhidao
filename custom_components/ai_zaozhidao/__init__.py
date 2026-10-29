@@ -37,7 +37,7 @@ from .const import (
     SERVICE_REFRESH,
 )
 from .coordinator import AiZaoZhiDaoCoordinator
-from .processor import ProcessError, build_processed_audio, ringtone_asset_path
+from .processor import ProcessError, build_processed_audio, cleanup_expired, ringtone_asset_path
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -219,6 +219,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await coordinator.async_config_entry_first_refresh()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # 启动时清理过期的合成音频（保留 1 天）；仅 stat 扫描，直接执行不阻塞
+    await hass.async_add_executor_job(cleanup_expired, hass)
 
     if not hass.services.has_service(DOMAIN, SERVICE_PLAY):
         hass.services.async_register(
