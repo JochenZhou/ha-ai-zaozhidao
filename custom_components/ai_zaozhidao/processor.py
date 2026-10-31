@@ -12,6 +12,7 @@ import logging
 import shutil
 import time
 from pathlib import Path
+from urllib.parse import quote
 
 from homeassistant.core import HomeAssistant
 
@@ -189,7 +190,7 @@ async def build_processed_audio(
     if out_path.exists() and out_path.stat().st_size > 0:
         # 缓存命中也顺带清理过期文件（不删自己）
         await hass.async_add_executor_job(cleanup_expired, hass, out_path)
-        return f"/local/{OUTPUT_DIRNAME}/{out_name}"
+        return f"/local/{OUTPUT_DIRNAME}/{quote(out_name)}"
 
     src = out_dir / f".src_{digest}.m4a"
     try:
@@ -201,4 +202,4 @@ async def build_processed_audio(
     # 合成完成后清理过期文件（不删刚生成的）
     await hass.async_add_executor_job(cleanup_expired, hass, out_path)
     _LOGGER.info("音频合成完成: %s (铃声=%s, 倍速=%.2f)", out_name, bool(ringtone_path), speed)
-    return f"/local/{OUTPUT_DIRNAME}/{out_name}"
+    return f"/local/{OUTPUT_DIRNAME}/{quote(out_name)}"

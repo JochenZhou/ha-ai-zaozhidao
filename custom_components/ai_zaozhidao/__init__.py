@@ -18,6 +18,7 @@ from .api import extract_podcast_id
 from .const import (
     ATTR_ENTRY_ID,
     ATTR_TITLE,
+    CONF_BASE_URL,
     CONF_MEDIA_PLAYER,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TARGET,
@@ -91,6 +92,87 @@ async def _async_notify(hass: HomeAssistant, data: dict, title: str, message: st
         _LOGGER.warning("调用通知服务 %s 失败: %s", service, err)
 
 
+def _url_from_adapters(hass: HomeAssistant) -> str | None:
+    """按网卡 IPv4 推断 HA 地址（无 internal_url 时的兜底）。"""
+    try:
+        from homeassistant.helpers import network
+
+        adapters = network.async_get_adapters(hass)
+    except Exception:  # noqa: BLE001
+        return None
+    port = getattr(hass.http, "server_port", 8123)
+    suffix = "" if port in (80, 443) else f":{port}"
+
+    def _first_ip(adapter: dict) -> str | None:
+        for ip_info in adapter.get("ipv4", []):
+            address = ip_info.get("address")
+            if not address:
+                continue
+            if address.startswith(("127.", "169.254.")):
+                continue
+            # 跳过 docker 默认网桥段，播放器访问不到
+            if address.startswith(("172.17.", "172.18.", "172.19.")):
+                continue
+            return address
+        return None
+
+    usable = [a for a in adapters if a.get("enabled", True)]
+    # 先默认路由网卡，再其他
+    for group in ([a for a in usable if a.get("default")], usable):
+        for adapter in group:
+            address = _first_ip(adapter)
+            if address:
+                return f"http://{address}{suffix}"
+    return None
+
+
+def _url_from_socket(hass: HomeAssistant) -> str | None:
+    """最后兜底：取本机出网网卡 IP（UDP connect 不发包）。"""
+    import socket
+
+    port = getattr(hass.http, "server_port", 8123)
+    suffix = "" if port in (80, 443) else f":{port}"
+    for target in (("8.8.8.8", 80), ("223.5.5.5", 80), ("192.168.1.1", 80)):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            sock.settimeout(0.2)
+            sock.connect(target)
+            address = sock.getsockname()[0]
+            if address and not address.startswith(("127.", "0.0.0.0")):
+                return f"http://{address}{suffix}"
+        except OSError:
+            continue
+        finally:
+            sock.close()
+    return None
+
+
+def _base_url(hass: HomeAssistant, data: dict) -> str:
+    """播放器可访问的 HA 地址：手填 > HA 配置 > 自动探测 > 网卡 IP。"""
+    custom = str(data.get(CONF_BASE_URL) or "").strip()
+    if custom:
+        return custom.rstrip("/")
+    for attr in ("internal_url", "external_url"):
+        value = getattr(hass.config, attr, None)
+        if value:
+            return str(value).rstrip("/")
+    try:
+        from homeassistant.helpers.network import get_url
+
+        return get_url(hass, allow_ip=True, allow_cloud=False, prefer_internal=True).rstrip("/")
+    except Exception:  # noqa: BLE001
+        pass
+    guessed = _url_from_adapters(hass)
+    if guessed:
+        return guessed
+    guessed = _url_from_socket(hass)
+    if guessed:
+        return guessed
+    raise HomeAssistantError(
+        "无法确定 HA 的访问地址，请在集成选项里填写「服务地址」，如 http://192.168.101.75"
+    )
+
+
 async def _resolve_media_url(hass: HomeAssistant, data: dict, episode) -> str:
     """按配置决定播放地址：开了铃声/变速就先合成，否则直接用源 URL。"""
     ringtone_enabled = bool(data.get(CONF_RINGTONE_ENABLED, DEFAULT_RINGTONE_ENABLED))
@@ -111,7 +193,7 @@ async def _resolve_media_url(hass: HomeAssistant, data: dict, episode) -> str:
         return episode.url
 
     try:
-        return await build_processed_audio(
+        rel_url = await build_processed_audio(
             hass,
             episode.url,
             ringtone_path=ringtone_path,
@@ -120,6 +202,22 @@ async def _resolve_media_url(hass: HomeAssistant, data: dict, episode) -> str:
         )
     except ProcessError as err:
         raise HomeAssistantError(f"音频合成失败: {err}") from err
+
+    # 播放器拿不到相对路径，必须给绝对地址
+    if rel_url.startswith("/"):
+        return f"{_base_url(hass, data)}{rel_url}"
+    return rel_url
+
+
+def player_problem(hass: HomeAssistant, media_player: str, title: str = "") -> str | None:
+    """目标播放器不可播时返回原因；可播返回 None。"""
+    state = hass.states.get(media_player)
+    if state is None:
+        return f"目标播放器 {media_player} 不存在，请在集成选项里重新选择"
+    if state.state in ("unavailable", "unknown"):
+        suffix = f"，本次未播放《{title}》" if title else "，本次未播放"
+        return f"目标播放器 {media_player} 当前不可用（{state.state}）{suffix}"
+    return None
 
 
 async def async_play(
@@ -146,6 +244,15 @@ async def async_play(
             raise HomeAssistantError(message)
         return message
 
+    # 目标播放器不可用时播放会静默失败，必须提前拦住并提醒
+    problem = player_problem(hass, media_player, episode.title)
+    if problem:
+        _LOGGER.warning("%s", problem)
+        await _async_notify(hass, data, coordinator.title_prefix, problem)
+        if raise_on_missing:
+            raise HomeAssistantError(problem)
+        return problem
+
     media_url = await _resolve_media_url(hass, data, episode)
 
     volume = data.get("volume") or 0
@@ -157,16 +264,23 @@ async def async_play(
             blocking=True,
         )
 
-    await hass.services.async_call(
-        "media_player",
-        "play_media",
-        {
-            "entity_id": media_player,
-            "media_content_id": media_url,
-            "media_content_type": "music",
-        },
-        blocking=True,
-    )
+    try:
+        await hass.services.async_call(
+            "media_player",
+            "play_media",
+            {
+                "entity_id": media_player,
+                "media_content_id": media_url,
+                "media_content_type": "music",
+            },
+            blocking=True,
+        )
+    except Exception as err:  # noqa: BLE001
+        message = f"播放失败：{media_player} 拒绝播放（{err}）"
+        _LOGGER.warning("%s", message)
+        await _async_notify(hass, data, coordinator.title_prefix, message)
+        raise HomeAssistantError(message) from err
+
     _LOGGER.info("已播放 %s -> %s (%s)", episode.title, media_player, media_url)
     return f"已播放 {episode.title}"
 
@@ -215,6 +329,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_RINGTONE_ENABLED: bool(cfg.get(CONF_RINGTONE_ENABLED, DEFAULT_RINGTONE_ENABLED)),
         CONF_RINGTONE_FILE: cfg.get(CONF_RINGTONE_FILE) or DEFAULT_RINGTONE_FILE,
         CONF_SPEED: float(cfg.get(CONF_SPEED) or DEFAULT_SPEED),
+        CONF_BASE_URL: (cfg.get(CONF_BASE_URL) or "").strip(),
     }
 
     await coordinator.async_config_entry_first_refresh()

@@ -13,7 +13,8 @@
           "volume": "Volume before playing",
           "ringtone_enabled": "Play a ringtone before the episode",
           "ringtone_file": "Custom ringtone file path",
-          "speed": "Playback speed"
+          "speed": "Playback speed",
+          "base_url": "Home Assistant address"
         },
         "data_description": {
           "podcast": "Full 小宇宙 podcast URL or the 24-character podcast ID.",
@@ -24,7 +25,8 @@
           "volume": "Optional. 0 = leave the speaker volume unchanged.",
           "ringtone_enabled": "Off by default. When on, a ringtone is prepended before the episode (the built-in Morning alarm ringtone, no volume change). Requires ffmpeg in the HA container.",
           "ringtone_file": "Optional absolute path to your own audio file (inside the HA container), e.g. /config/local/my-ring.mp3. Leave empty to use the built-in ringtone.",
-          "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed."
+          "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed.",
+          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP)."
         }
       },
       "reconfigure": {
@@ -39,7 +41,8 @@
           "volume": "Volume before playing",
           "ringtone_enabled": "Play a ringtone before the episode",
           "ringtone_file": "Custom ringtone file path",
-          "speed": "Playback speed"
+          "speed": "Playback speed",
+          "base_url": "Home Assistant address"
         },
         "data_description": {
           "podcast": "Full 小宇宙 podcast URL or the 24-character podcast ID.",
@@ -50,14 +53,16 @@
           "volume": "0 = leave the speaker volume unchanged.",
           "ringtone_enabled": "Off by default. When on, a ringtone is prepended before the episode (the built-in Morning alarm ringtone, no volume change). Requires ffmpeg in the HA container.",
           "ringtone_file": "Optional absolute path to your own audio file (inside the HA container), e.g. /config/local/my-ring.mp3. Leave empty to use the built-in ringtone.",
-          "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed."
+          "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed.",
+          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP)."
         }
       }
     },
     "error": {
       "cannot_connect": "Failed to fetch the podcast page",
       "invalid_podcast": "Could not parse a podcast ID from the input",
-      "unknown": "Unexpected error"
+      "unknown": "Unexpected error",
+      "invalid_base_url": "Address must start with http:// or https://"
     },
     "abort": {
       "already_configured": "AI早知道播客 is already configured",
@@ -78,7 +83,8 @@
           "volume": "Volume before playing",
           "ringtone_enabled": "Play a ringtone before the episode",
           "ringtone_file": "Custom ringtone file path",
-          "speed": "Playback speed"
+          "speed": "Playback speed",
+          "base_url": "Home Assistant address"
         },
         "data_description": {
           "podcast": "Full 小宇宙 podcast URL or the 24-character podcast ID.",
@@ -89,21 +95,33 @@
           "volume": "0 = leave the speaker volume unchanged.",
           "ringtone_enabled": "Off by default. When on, a ringtone is prepended before the episode (the built-in Morning alarm ringtone, no volume change). Requires ffmpeg in the HA container.",
           "ringtone_file": "Optional absolute path to your own audio file (inside the HA container), e.g. /config/local/my-ring.mp3. Leave empty to use the built-in ringtone.",
-          "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed."
+          "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed.",
+          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP)."
         }
       }
+    },
+    "error": {
+      "invalid_base_url": "Address must start with http:// or https://"
     }
   },
   "entity": {
     "sensor": {
-      "latest_title": {"name": "Latest episode"},
-      "latest_date": {"name": "Latest episode date"}
+      "latest_title": {
+        "name": "Latest episode"
+      },
+      "latest_date": {
+        "name": "Latest episode date"
+      }
     },
     "binary_sensor": {
-      "today_available": {"name": "Today's episode available"}
+      "today_available": {
+        "name": "Today's episode available"
+      }
     },
     "button": {
-      "play_today": {"name": "Play today's episode"}
+      "play_today": {
+        "name": "Play today's episode"
+      }
     }
   },
   "services": {
@@ -111,15 +129,24 @@
       "name": "Play today's episode",
       "description": "Play today's episode; send a reminder instead when today's episode is not published yet.",
       "fields": {
-        "title": {"name": "Episode title", "description": "Optional exact title to play."},
-        "entry_id": {"name": "Config entry", "description": "Optional config entry to act on."}
+        "title": {
+          "name": "Episode title",
+          "description": "Optional exact title to play."
+        },
+        "entry_id": {
+          "name": "Config entry",
+          "description": "Optional config entry to act on."
+        }
       }
     },
     "refresh": {
       "name": "Refresh now",
       "description": "Re-fetch the podcast list immediately.",
       "fields": {
-        "entry_id": {"name": "Config entry", "description": "Optional config entry to act on."}
+        "entry_id": {
+          "name": "Config entry",
+          "description": "Optional config entry to act on."
+        }
       }
     }
   }

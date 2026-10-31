@@ -14,6 +14,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import AiZaoZhiDaoError, async_fetch_episodes, extract_podcast_id
 from .const import (
+    CONF_BASE_URL,
     CONF_MEDIA_PLAYER,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TARGET,
@@ -53,6 +54,7 @@ def _normalize(user_input: dict) -> dict:
     except (TypeError, ValueError):
         values[CONF_SPEED] = DEFAULT_SPEED
     values[CONF_RINGTONE_ENABLED] = bool(values.get(CONF_RINGTONE_ENABLED, DEFAULT_RINGTONE_ENABLED))
+    values[CONF_BASE_URL] = (values.get(CONF_BASE_URL) or "").strip().rstrip("/")
     return values
 
 
@@ -100,6 +102,9 @@ def _schema(defaults: dict | None = None) -> vol.Schema:
                     min=0.5, max=3.0, step=0.05, mode=selector.NumberSelectorMode.BOX
                 )
             ),
+            vol.Optional(
+                CONF_BASE_URL, default=d.get(CONF_BASE_URL, "")
+            ): selector.TextSelector(),
         }
     )
     return vol.Schema(fields)
@@ -110,6 +115,9 @@ async def _validate(hass, user_input: dict) -> str | None:
     podcast_id = extract_podcast_id(str(user_input.get(CONF_PODCAST, "")))
     if not podcast_id:
         return "invalid_podcast"
+    base_url = str(user_input.get(CONF_BASE_URL) or "").strip()
+    if base_url and not base_url.startswith(("http://", "https://")):
+        return "invalid_base_url"
     try:
         episodes = await async_fetch_episodes(async_get_clientsession(hass), podcast_id)
     except AiZaoZhiDaoError as err:
