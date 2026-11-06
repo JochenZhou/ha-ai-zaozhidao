@@ -14,7 +14,10 @@
           "ringtone_enabled": "Play a ringtone before the episode",
           "ringtone_file": "Custom ringtone file path",
           "speed": "Playback speed",
-          "base_url": "Home Assistant address"
+          "base_url": "Home Assistant address",
+          "continue_music": "Continue with random music",
+          "continue_tracks": "Number of random tracks",
+          "continue_player": "Player for continued music"
         },
         "data_description": {
           "podcast": "Full 小宇宙 podcast URL or the 24-character podcast ID.",
@@ -26,7 +29,10 @@
           "ringtone_enabled": "Off by default. When on, a ringtone is prepended before the episode (the built-in Morning alarm ringtone, no volume change). Requires ffmpeg in the HA container.",
           "ringtone_file": "Optional absolute path to your own audio file (inside the HA container), e.g. /config/local/my-ring.mp3. Leave empty to use the built-in ringtone.",
           "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed.",
-          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP)."
+          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP).",
+          "continue_music": "When the podcast finishes, ask Music Assistant to play a random track from your library. Requires the MA integration.",
+          "continue_tracks": "How many random tracks to queue (1 = a single track).",
+          "continue_player": "Music Assistant player used for the continued music. Leave empty to reuse the podcast player."
         }
       },
       "reconfigure": {
@@ -42,7 +48,10 @@
           "ringtone_enabled": "Play a ringtone before the episode",
           "ringtone_file": "Custom ringtone file path",
           "speed": "Playback speed",
-          "base_url": "Home Assistant address"
+          "base_url": "Home Assistant address",
+          "continue_music": "Continue with random music",
+          "continue_tracks": "Number of random tracks",
+          "continue_player": "Player for continued music"
         },
         "data_description": {
           "podcast": "Full 小宇宙 podcast URL or the 24-character podcast ID.",
@@ -54,7 +63,10 @@
           "ringtone_enabled": "Off by default. When on, a ringtone is prepended before the episode (the built-in Morning alarm ringtone, no volume change). Requires ffmpeg in the HA container.",
           "ringtone_file": "Optional absolute path to your own audio file (inside the HA container), e.g. /config/local/my-ring.mp3. Leave empty to use the built-in ringtone.",
           "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed.",
-          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP)."
+          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP).",
+          "continue_music": "When the podcast finishes, ask Music Assistant to play a random track from your library. Requires the MA integration.",
+          "continue_tracks": "How many random tracks to queue (1 = a single track).",
+          "continue_player": "Music Assistant player used for the continued music. Leave empty to reuse the podcast player."
         }
       }
     },
@@ -84,7 +96,10 @@
           "ringtone_enabled": "Play a ringtone before the episode",
           "ringtone_file": "Custom ringtone file path",
           "speed": "Playback speed",
-          "base_url": "Home Assistant address"
+          "base_url": "Home Assistant address",
+          "continue_music": "Continue with random music",
+          "continue_tracks": "Number of random tracks",
+          "continue_player": "Player for continued music"
         },
         "data_description": {
           "podcast": "Full 小宇宙 podcast URL or the 24-character podcast ID.",
@@ -96,7 +111,10 @@
           "ringtone_enabled": "Off by default. When on, a ringtone is prepended before the episode (the built-in Morning alarm ringtone, no volume change). Requires ffmpeg in the HA container.",
           "ringtone_file": "Optional absolute path to your own audio file (inside the HA container), e.g. /config/local/my-ring.mp3. Leave empty to use the built-in ringtone.",
           "speed": "Playback speed for the episode body, 0.5-3.0, default 1.0 (unchanged). The ringtone always plays at normal speed.",
-          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP)."
+          "base_url": "Optional. Address the player uses to reach Home Assistant, e.g. http://192.168.101.75 . Leave empty to auto-detect (HA internal/external URL, then network IP).",
+          "continue_music": "When the podcast finishes, ask Music Assistant to play a random track from your library. Requires the MA integration.",
+          "continue_tracks": "How many random tracks to queue (1 = a single track).",
+          "continue_player": "Music Assistant player used for the continued music. Leave empty to reuse the podcast player."
         }
       }
     },

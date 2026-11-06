@@ -14,7 +14,10 @@
           "ringtone_enabled": "播放前先响一段铃声",
           "ringtone_file": "自定义铃声文件路径",
           "speed": "播放倍速",
-          "base_url": "服务地址（HA 访问地址）"
+          "base_url": "服务地址（HA 访问地址）",
+          "continue_music": "播完续播随机音乐",
+          "continue_tracks": "续播曲目数",
+          "continue_player": "续播播放器（MA）"
         },
         "data_description": {
           "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
@@ -26,7 +29,10 @@
           "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
           "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
           "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。",
-          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。"
+          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。",
+          "continue_music": "播客播完后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
+          "continue_tracks": "续播随机几首，1 = 只放一首。",
+          "continue_player": "续播用的 Music Assistant 播放器；留空则沿用上面的播客播放器。"
         }
       },
       "reconfigure": {
@@ -42,7 +48,10 @@
           "ringtone_enabled": "播放前先响一段铃声",
           "ringtone_file": "自定义铃声文件路径",
           "speed": "播放倍速",
-          "base_url": "服务地址（HA 访问地址）"
+          "base_url": "服务地址（HA 访问地址）",
+          "continue_music": "播完续播随机音乐",
+          "continue_tracks": "续播曲目数",
+          "continue_player": "续播播放器（MA）"
         },
         "data_description": {
           "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
@@ -54,7 +63,10 @@
           "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
           "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
           "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。",
-          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。"
+          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。",
+          "continue_music": "播客播完后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
+          "continue_tracks": "续播随机几首，1 = 只放一首。",
+          "continue_player": "续播用的 Music Assistant 播放器；留空则沿用上面的播客播放器。"
         }
       }
     },
@@ -84,7 +96,10 @@
           "ringtone_enabled": "播放前先响一段铃声",
           "ringtone_file": "自定义铃声文件路径",
           "speed": "播放倍速",
-          "base_url": "服务地址（HA 访问地址）"
+          "base_url": "服务地址（HA 访问地址）",
+          "continue_music": "播完续播随机音乐",
+          "continue_tracks": "续播曲目数",
+          "continue_player": "续播播放器（MA）"
         },
         "data_description": {
           "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
@@ -96,7 +111,10 @@
           "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
           "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
           "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。",
-          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。"
+          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。",
+          "continue_music": "播客播完后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
+          "continue_tracks": "续播随机几首，1 = 只放一首。",
+          "continue_player": "续播用的 Music Assistant 播放器；留空则沿用上面的播客播放器。"
         }
       }
     },

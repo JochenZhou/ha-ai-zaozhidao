@@ -8,7 +8,7 @@ from pathlib import Path
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -19,6 +19,9 @@ from .const import (
     ATTR_ENTRY_ID,
     ATTR_TITLE,
     CONF_BASE_URL,
+    CONF_CONTINUE_MUSIC,
+    CONF_CONTINUE_PLAYER,
+    CONF_CONTINUE_TRACKS,
     CONF_MEDIA_PLAYER,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TARGET,
@@ -31,12 +34,15 @@ from .const import (
     DEFAULT_PODCAST,
     DEFAULT_RINGTONE_ENABLED,
     DEFAULT_RINGTONE_FILE,
+    DEFAULT_CONTINUE_MUSIC,
+    DEFAULT_CONTINUE_TRACKS,
     DEFAULT_SPEED,
     DEFAULT_TITLE_PREFIX,
     DOMAIN,
     SERVICE_PLAY,
     SERVICE_REFRESH,
 )
+from .continue_music import ContinueMusicWatcher
 from .coordinator import AiZaoZhiDaoCoordinator
 from .processor import ProcessError, build_processed_audio, cleanup_expired, ringtone_asset_path
 
@@ -282,7 +288,54 @@ async def async_play(
         raise HomeAssistantError(message) from err
 
     _LOGGER.info("已播放 %s -> %s (%s)", episode.title, media_player, media_url)
+
+    if data.get(CONF_CONTINUE_MUSIC):
+        _async_watch_for_continue(hass, data, coordinator, media_player, media_url, episode)
     return f"已播放 {episode.title}"
+
+
+@callback
+def _async_watch_for_continue(
+    hass: HomeAssistant,
+    data: dict,
+    coordinator: AiZaoZhiDaoCoordinator,
+    media_player: str,
+    media_url: str,
+    episode,
+) -> None:
+    """播放已开始，注册「播完后随机续播音乐」的监听。"""
+    target = (data.get(CONF_CONTINUE_PLAYER) or media_player).strip()
+    prefix = coordinator.title_prefix
+
+    async def _notify(message: str) -> None:
+        await _async_notify(hass, data, prefix, message)
+
+    # 先清掉同一播放器上残留的监听
+    _async_cancel_watchers(hass, data, media_player)
+    watcher = ContinueMusicWatcher(
+        hass,
+        entity_id=media_player,
+        media_content_id=media_url,
+        expected_duration=float(getattr(episode, "duration", 0) or 0),
+        count=int(data.get(CONF_CONTINUE_TRACKS) or DEFAULT_CONTINUE_TRACKS),
+        target=target,
+        notify=_notify,
+    )
+    watcher.async_start()
+    data.setdefault("watchers", []).append(watcher)
+    _LOGGER.debug("已注册播完续播监听: %s -> %s", media_player, target)
+
+
+@callback
+def _async_cancel_watchers(hass: HomeAssistant, data: dict, media_player: str | None = None) -> None:
+    """注销监听（可选只清某个播放器）。"""
+    keep = []
+    for watcher in data.get("watchers", []):
+        if media_player is None or watcher.entity_id == media_player:
+            watcher.async_stop()
+        else:
+            keep.append(watcher)
+    data["watchers"] = keep
 
 
 async def _handle_play(call: ServiceCall) -> dict:
@@ -330,6 +383,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_RINGTONE_FILE: cfg.get(CONF_RINGTONE_FILE) or DEFAULT_RINGTONE_FILE,
         CONF_SPEED: float(cfg.get(CONF_SPEED) or DEFAULT_SPEED),
         CONF_BASE_URL: (cfg.get(CONF_BASE_URL) or "").strip(),
+        CONF_CONTINUE_MUSIC: bool(cfg.get(CONF_CONTINUE_MUSIC, DEFAULT_CONTINUE_MUSIC)),
+        CONF_CONTINUE_TRACKS: int(cfg.get(CONF_CONTINUE_TRACKS) or DEFAULT_CONTINUE_TRACKS),
+        CONF_CONTINUE_PLAYER: (cfg.get(CONF_CONTINUE_PLAYER) or "").strip(),
     }
 
     await coordinator.async_config_entry_first_refresh()
@@ -371,6 +427,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     store = hass.data.get(DOMAIN, {})
     if unload_ok:
+        entry_data = store.get(entry.entry_id)
+        if isinstance(entry_data, dict):
+            for watcher in entry_data.get("watchers", []):
+                watcher.async_stop()
         store.pop(entry.entry_id, None)
         if not any(isinstance(v, dict) for k, v in store.items() if k != "services"):
             for service in (SERVICE_PLAY, SERVICE_REFRESH):

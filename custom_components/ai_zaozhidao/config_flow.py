@@ -15,6 +15,9 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import AiZaoZhiDaoError, async_fetch_episodes, extract_podcast_id
 from .const import (
     CONF_BASE_URL,
+    CONF_CONTINUE_MUSIC,
+    CONF_CONTINUE_PLAYER,
+    CONF_CONTINUE_TRACKS,
     CONF_MEDIA_PLAYER,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TARGET,
@@ -27,6 +30,8 @@ from .const import (
     DEFAULT_PODCAST,
     DEFAULT_RINGTONE_ENABLED,
     DEFAULT_RINGTONE_FILE,
+    DEFAULT_CONTINUE_MUSIC,
+    DEFAULT_CONTINUE_TRACKS,
     DEFAULT_SPEED,
     DEFAULT_TITLE_PREFIX,
     DOMAIN,
@@ -55,6 +60,16 @@ def _normalize(user_input: dict) -> dict:
         values[CONF_SPEED] = DEFAULT_SPEED
     values[CONF_RINGTONE_ENABLED] = bool(values.get(CONF_RINGTONE_ENABLED, DEFAULT_RINGTONE_ENABLED))
     values[CONF_BASE_URL] = (values.get(CONF_BASE_URL) or "").strip().rstrip("/")
+    values[CONF_CONTINUE_MUSIC] = bool(
+        values.get(CONF_CONTINUE_MUSIC, DEFAULT_CONTINUE_MUSIC)
+    )
+    values[CONF_CONTINUE_PLAYER] = str(
+        values.get(CONF_CONTINUE_PLAYER) or values.get(CONF_MEDIA_PLAYER) or ""
+    ).strip()
+    try:
+        values[CONF_CONTINUE_TRACKS] = max(1, int(values.get(CONF_CONTINUE_TRACKS) or DEFAULT_CONTINUE_TRACKS))
+    except (TypeError, ValueError):
+        values[CONF_CONTINUE_TRACKS] = DEFAULT_CONTINUE_TRACKS
     return values
 
 
@@ -105,6 +120,22 @@ def _schema(defaults: dict | None = None) -> vol.Schema:
             vol.Optional(
                 CONF_BASE_URL, default=d.get(CONF_BASE_URL, "")
             ): selector.TextSelector(),
+            vol.Optional(
+                CONF_CONTINUE_MUSIC,
+                default=d.get(CONF_CONTINUE_MUSIC, DEFAULT_CONTINUE_MUSIC),
+            ): selector.BooleanSelector(),
+            vol.Required(
+                CONF_CONTINUE_PLAYER,
+                default=d.get(CONF_CONTINUE_PLAYER) or d.get(CONF_MEDIA_PLAYER),
+            ): media_player,
+            vol.Optional(
+                CONF_CONTINUE_TRACKS,
+                default=d.get(CONF_CONTINUE_TRACKS, DEFAULT_CONTINUE_TRACKS),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1, max=50, step=1, mode=selector.NumberSelectorMode.BOX
+                )
+            ),
         }
     )
     return vol.Schema(fields)
