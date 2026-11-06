@@ -16,23 +16,25 @@
           "speed": "播放倍速",
           "base_url": "服务地址（HA 访问地址）",
           "continue_music": "播完续播随机音乐",
-          "continue_tracks": "续播曲目数",
-          "continue_player": "续播播放器（MA）"
+          "continue_tracks": "随机曲目数",
+          "continue_player": "音乐播放器（MA）",
+          "music_when_empty": "无新一期时直接播音乐"
         },
         "data_description": {
-          "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
-          "title_prefix": "期号按「前缀-YY-MM-DD」精确匹配当天那一期。",
-          "media_player": "播放到哪台音箱/播放器。",
-          "notify_service": "可选，如 notify.wework —— 当天还没更新时用它发提醒。",
-          "notify_target": "可选，传给提醒服务的目标/接收人。",
-          "volume": "播放前先把音箱音量调到该值；0 = 不修改音箱当前音量。",
-          "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
-          "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
-          "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。",
-          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。",
-          "continue_music": "播客播完后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
-          "continue_tracks": "续播随机几首，1 = 只放一首。",
-          "continue_player": "续播用的 Music Assistant 播放器；留空则沿用上面的播客播放器。"
+          "podcast": "小宇宙播客的完整链接或 24 位 ID，集成按它抓取最新一期。",
+          "title_prefix": "期号前缀，按「前缀-YY-MM-DD」匹配当天那一期，例如「AI早知道」。",
+          "media_player": "播客播放到哪台音箱/播放器。离线（unavailable/unknown）时跳过播放并发提醒。",
+          "notify_service": "可选，如 notify.wework。没有新一期、播放失败、续播结果都用它提醒；留空只发 HA 持久通知。",
+          "notify_target": "可选，传给提醒服务的目标/接收人；留空使用服务默认目标。",
+          "volume": "播放前先把音箱音量调到该值（0–1）；0 = 不改动音箱当前音量。",
+          "ringtone_enabled": "开启后正片前先播一段铃声（内置 Morning 铃声，原速、结尾淡出，不改音量）。需要容器内有 ffmpeg（官方容器自带）。",
+          "ringtone_file": "可选，自定义铃声在容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
+          "speed": "正片倍速 0.5–3.0，默认 1.0 不变速；铃声始终原速播放。",
+          "base_url": "播放器访问 Home Assistant 的地址，如 http://192.168.101.75。留空自动探测（HA 内网/外网地址 → 网卡 IP）。开了铃声或倍速时音频经 /local/ 提供，建议填死。",
+          "continue_music": "播客播完（已播 ≥ 80%）后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
+          "continue_tracks": "随机几首，1 = 只放一首；「播完续播」和「无新一期时播音乐」共用。",
+          "continue_player": "续播与无新一期时用来放音乐的 Music Assistant 播放器，默认同播客播放器。若音箱是 ESPHome，MA 里通常对应带 _2 后缀的同名实体。",
+          "music_when_empty": "当天还没有新一期时，不发提醒而是直接随机播放音乐（曲目数与播放器用下面两项）。适合把早晨的定时播放当「播客优先、音乐兜底」。"
         }
       },
       "reconfigure": {
@@ -50,23 +52,25 @@
           "speed": "播放倍速",
           "base_url": "服务地址（HA 访问地址）",
           "continue_music": "播完续播随机音乐",
-          "continue_tracks": "续播曲目数",
-          "continue_player": "续播播放器（MA）"
+          "continue_tracks": "随机曲目数",
+          "continue_player": "音乐播放器（MA）",
+          "music_when_empty": "无新一期时直接播音乐"
         },
         "data_description": {
-          "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
-          "title_prefix": "期号按「前缀-YY-MM-DD」精确匹配当天那一期。",
-          "media_player": "播放到哪台音箱/播放器。",
-          "notify_service": "可选，如 notify.wework —— 当天还没更新时用它发提醒。",
-          "notify_target": "可选，传给提醒服务的目标/接收人。",
-          "volume": "播放前先把音箱音量调到该值；0 = 不修改音箱当前音量。",
-          "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
-          "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
-          "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。",
-          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。",
-          "continue_music": "播客播完后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
-          "continue_tracks": "续播随机几首，1 = 只放一首。",
-          "continue_player": "续播用的 Music Assistant 播放器；留空则沿用上面的播客播放器。"
+          "podcast": "小宇宙播客的完整链接或 24 位 ID，集成按它抓取最新一期。",
+          "title_prefix": "期号前缀，按「前缀-YY-MM-DD」匹配当天那一期，例如「AI早知道」。",
+          "media_player": "播客播放到哪台音箱/播放器。离线（unavailable/unknown）时跳过播放并发提醒。",
+          "notify_service": "可选，如 notify.wework。没有新一期、播放失败、续播结果都用它提醒；留空只发 HA 持久通知。",
+          "notify_target": "可选，传给提醒服务的目标/接收人；留空使用服务默认目标。",
+          "volume": "播放前先把音箱音量调到该值（0–1）；0 = 不改动音箱当前音量。",
+          "ringtone_enabled": "开启后正片前先播一段铃声（内置 Morning 铃声，原速、结尾淡出，不改音量）。需要容器内有 ffmpeg（官方容器自带）。",
+          "ringtone_file": "可选，自定义铃声在容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
+          "speed": "正片倍速 0.5–3.0，默认 1.0 不变速；铃声始终原速播放。",
+          "base_url": "播放器访问 Home Assistant 的地址，如 http://192.168.101.75。留空自动探测（HA 内网/外网地址 → 网卡 IP）。开了铃声或倍速时音频经 /local/ 提供，建议填死。",
+          "continue_music": "播客播完（已播 ≥ 80%）后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
+          "continue_tracks": "随机几首，1 = 只放一首；「播完续播」和「无新一期时播音乐」共用。",
+          "continue_player": "续播与无新一期时用来放音乐的 Music Assistant 播放器，默认同播客播放器。若音箱是 ESPHome，MA 里通常对应带 _2 后缀的同名实体。",
+          "music_when_empty": "当天还没有新一期时，不发提醒而是直接随机播放音乐（曲目数与播放器用下面两项）。适合把早晨的定时播放当「播客优先、音乐兜底」。"
         }
       }
     },
@@ -98,23 +102,25 @@
           "speed": "播放倍速",
           "base_url": "服务地址（HA 访问地址）",
           "continue_music": "播完续播随机音乐",
-          "continue_tracks": "续播曲目数",
-          "continue_player": "续播播放器（MA）"
+          "continue_tracks": "随机曲目数",
+          "continue_player": "音乐播放器（MA）",
+          "music_when_empty": "无新一期时直接播音乐"
         },
         "data_description": {
-          "podcast": "小宇宙播客的完整链接或 24 位播客 ID。",
-          "title_prefix": "期号按「前缀-YY-MM-DD」精确匹配当天那一期。",
-          "media_player": "播放到哪台音箱/播放器。",
-          "notify_service": "可选，如 notify.wework —— 当天还没更新时用它发提醒。",
-          "notify_target": "可选，传给提醒服务的目标/接收人。",
-          "volume": "播放前先把音箱音量调到该值；0 = 不修改音箱当前音量。",
-          "ringtone_enabled": "默认关闭。开启后在正片前先播放一段铃声（内置 Morning 铃声，原速、结尾淡出，不改变音箱音量）。需要 HA 容器内装有 ffmpeg（官方容器自带）。",
-          "ringtone_file": "可选，自定义铃声在 HA 容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
-          "speed": "正片播放倍速，0.5-3.0，默认 1.0（不变速）。铃声始终原速播放。",
-          "base_url": "可选，播放器访问 Home Assistant 用的地址，如 http://192.168.101.75 ；留空则自动探测（先看 HA 的内网/外网地址，再按网卡 IP 推断）。开启铃声或倍速时必填更稳妥。",
-          "continue_music": "播客播完后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
-          "continue_tracks": "续播随机几首，1 = 只放一首。",
-          "continue_player": "续播用的 Music Assistant 播放器；留空则沿用上面的播客播放器。"
+          "podcast": "小宇宙播客的完整链接或 24 位 ID，集成按它抓取最新一期。",
+          "title_prefix": "期号前缀，按「前缀-YY-MM-DD」匹配当天那一期，例如「AI早知道」。",
+          "media_player": "播客播放到哪台音箱/播放器。离线（unavailable/unknown）时跳过播放并发提醒。",
+          "notify_service": "可选，如 notify.wework。没有新一期、播放失败、续播结果都用它提醒；留空只发 HA 持久通知。",
+          "notify_target": "可选，传给提醒服务的目标/接收人；留空使用服务默认目标。",
+          "volume": "播放前先把音箱音量调到该值（0–1）；0 = 不改动音箱当前音量。",
+          "ringtone_enabled": "开启后正片前先播一段铃声（内置 Morning 铃声，原速、结尾淡出，不改音量）。需要容器内有 ffmpeg（官方容器自带）。",
+          "ringtone_file": "可选，自定义铃声在容器内的绝对路径，如 /config/local/my-ring.mp3；留空使用内置铃声。",
+          "speed": "正片倍速 0.5–3.0，默认 1.0 不变速；铃声始终原速播放。",
+          "base_url": "播放器访问 Home Assistant 的地址，如 http://192.168.101.75。留空自动探测（HA 内网/外网地址 → 网卡 IP）。开了铃声或倍速时音频经 /local/ 提供，建议填死。",
+          "continue_music": "播客播完（已播 ≥ 80%）后，让 Music Assistant 从曲库随机挑歌接着放。需要已安装 MA 集成。",
+          "continue_tracks": "随机几首，1 = 只放一首；「播完续播」和「无新一期时播音乐」共用。",
+          "continue_player": "续播与无新一期时用来放音乐的 Music Assistant 播放器，默认同播客播放器。若音箱是 ESPHome，MA 里通常对应带 _2 后缀的同名实体。",
+          "music_when_empty": "当天还没有新一期时，不发提醒而是直接随机播放音乐（曲目数与播放器用下面两项）。适合把早晨的定时播放当「播客优先、音乐兜底」。"
         }
       }
     },

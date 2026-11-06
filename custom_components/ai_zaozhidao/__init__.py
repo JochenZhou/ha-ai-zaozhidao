@@ -23,6 +23,7 @@ from .const import (
     CONF_CONTINUE_PLAYER,
     CONF_CONTINUE_TRACKS,
     CONF_MEDIA_PLAYER,
+    CONF_MUSIC_WHEN_EMPTY,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TARGET,
     CONF_PODCAST,
@@ -36,13 +37,14 @@ from .const import (
     DEFAULT_RINGTONE_FILE,
     DEFAULT_CONTINUE_MUSIC,
     DEFAULT_CONTINUE_TRACKS,
+    DEFAULT_MUSIC_WHEN_EMPTY,
     DEFAULT_SPEED,
     DEFAULT_TITLE_PREFIX,
     DOMAIN,
     SERVICE_PLAY,
     SERVICE_REFRESH,
 )
-from .continue_music import ContinueMusicWatcher
+from .continue_music import ContinueMusicWatcher, async_play_random_tracks
 from .coordinator import AiZaoZhiDaoCoordinator
 from .processor import ProcessError, build_processed_audio, cleanup_expired, ringtone_asset_path
 
@@ -244,9 +246,15 @@ async def async_play(
 
     if episode is None:
         message = f"今天还没有《{coordinator.title_prefix}》（{target}）新一期"
-        _LOGGER.info("%s", message)
-        await _async_notify(hass, data, coordinator.title_prefix, message)
-        if raise_on_missing:
+        ok = True
+        if data.get(CONF_MUSIC_WHEN_EMPTY):
+            message, ok = await _play_music_instead(
+                hass, data, coordinator, media_player, message
+            )
+        else:
+            _LOGGER.info("%s", message)
+            await _async_notify(hass, data, coordinator.title_prefix, message)
+        if raise_on_missing and not ok:
             raise HomeAssistantError(message)
         return message
 
@@ -338,6 +346,29 @@ def _async_cancel_watchers(hass: HomeAssistant, data: dict, media_player: str | 
     data["watchers"] = keep
 
 
+async def _play_music_instead(
+    hass: HomeAssistant,
+    data: dict,
+    coordinator: AiZaoZhiDaoCoordinator,
+    media_player: str,
+    empty_message: str,
+) -> tuple[str, bool]:
+    """没有新一期时改为直接播放随机音乐；返回 (消息, 是否成功)。"""
+    music_target = (data.get(CONF_CONTINUE_PLAYER) or media_player).strip()
+    count = int(data.get(CONF_CONTINUE_TRACKS) or DEFAULT_CONTINUE_TRACKS)
+    try:
+        await async_play_random_tracks(hass, count, music_target)
+    except Exception as err:  # noqa: BLE001
+        message = f"{empty_message}，随机音乐也播放失败：{err}"
+        _LOGGER.warning("%s", message)
+        await _async_notify(hass, data, coordinator.title_prefix, message)
+        return message, False
+    message = f"{empty_message}，已改播 {count} 首随机音乐"
+    _LOGGER.info("%s", message)
+    await _async_notify(hass, data, coordinator.title_prefix, message)
+    return message, True
+
+
 async def _handle_play(call: ServiceCall) -> dict:
     hass = call.hass
     entry_id = call.data.get(ATTR_ENTRY_ID)
@@ -386,6 +417,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_CONTINUE_MUSIC: bool(cfg.get(CONF_CONTINUE_MUSIC, DEFAULT_CONTINUE_MUSIC)),
         CONF_CONTINUE_TRACKS: int(cfg.get(CONF_CONTINUE_TRACKS) or DEFAULT_CONTINUE_TRACKS),
         CONF_CONTINUE_PLAYER: (cfg.get(CONF_CONTINUE_PLAYER) or "").strip(),
+        CONF_MUSIC_WHEN_EMPTY: bool(cfg.get(CONF_MUSIC_WHEN_EMPTY, DEFAULT_MUSIC_WHEN_EMPTY)),
     }
 
     await coordinator.async_config_entry_first_refresh()

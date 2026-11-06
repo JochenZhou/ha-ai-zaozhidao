@@ -15,6 +15,7 @@ CONF_BASE_URL = "base_url"
 CONF_CONTINUE_MUSIC = "continue_music"
 CONF_CONTINUE_TRACKS = "continue_tracks"
 CONF_CONTINUE_PLAYER = "continue_player"
+CONF_MUSIC_WHEN_EMPTY = "music_when_empty"
 
 DEFAULT_PODCAST = "6a6e4a2ec654846ef0ee0795"
 DEFAULT_TITLE_PREFIX = "AI早知道"
@@ -24,6 +25,7 @@ DEFAULT_RINGTONE_FILE = ""
 DEFAULT_SPEED = 1.0
 DEFAULT_CONTINUE_MUSIC = False
 DEFAULT_CONTINUE_TRACKS = 1
+DEFAULT_MUSIC_WHEN_EMPTY = False
 
 # 包内自带铃声（集成目录下）
 RINGTONE_ASSET = "assets/morning-alarm-ringtone.mp3"

@@ -19,6 +19,7 @@ from .const import (
     CONF_CONTINUE_PLAYER,
     CONF_CONTINUE_TRACKS,
     CONF_MEDIA_PLAYER,
+    CONF_MUSIC_WHEN_EMPTY,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_TARGET,
     CONF_PODCAST,
@@ -32,6 +33,7 @@ from .const import (
     DEFAULT_RINGTONE_FILE,
     DEFAULT_CONTINUE_MUSIC,
     DEFAULT_CONTINUE_TRACKS,
+    DEFAULT_MUSIC_WHEN_EMPTY,
     DEFAULT_SPEED,
     DEFAULT_TITLE_PREFIX,
     DOMAIN,
@@ -62,6 +64,9 @@ def _normalize(user_input: dict) -> dict:
     values[CONF_BASE_URL] = (values.get(CONF_BASE_URL) or "").strip().rstrip("/")
     values[CONF_CONTINUE_MUSIC] = bool(
         values.get(CONF_CONTINUE_MUSIC, DEFAULT_CONTINUE_MUSIC)
+    )
+    values[CONF_MUSIC_WHEN_EMPTY] = bool(
+        values.get(CONF_MUSIC_WHEN_EMPTY, DEFAULT_MUSIC_WHEN_EMPTY)
     )
     values[CONF_CONTINUE_PLAYER] = str(
         values.get(CONF_CONTINUE_PLAYER) or values.get(CONF_MEDIA_PLAYER) or ""
@@ -128,6 +133,10 @@ def _schema(defaults: dict | None = None) -> vol.Schema:
                 CONF_CONTINUE_PLAYER,
                 default=d.get(CONF_CONTINUE_PLAYER) or d.get(CONF_MEDIA_PLAYER),
             ): media_player,
+            vol.Optional(
+                CONF_MUSIC_WHEN_EMPTY,
+                default=d.get(CONF_MUSIC_WHEN_EMPTY, DEFAULT_MUSIC_WHEN_EMPTY),
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_CONTINUE_TRACKS,
                 default=d.get(CONF_CONTINUE_TRACKS, DEFAULT_CONTINUE_TRACKS),
