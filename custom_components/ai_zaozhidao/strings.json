@@ -22,7 +22,7 @@
         },
         "data_description": {
           "podcast": "Full xiaoyuzhoufm podcast URL or the 24-character podcast ID used to fetch the latest episode.",
-          "title_prefix": "Episode prefix; the latest episode is matched by \"<prefix>-YY-MM-DD\", e.g. \"AI早知道\".",
+          "title_prefix": "Episode prefix; the latest episode is matched by \"prefix-YY-MM-DD\", e.g. \"AI早知道\".",
           "media_player": "Where the podcast is played. Skipped with a notice when unavailable/unknown.",
           "notify_service": "Optional, e.g. notify.wework. Used for \"no new episode\", playback failures and continue-music results. Empty = HA persistent notification only.",
           "notify_target": "Optional target/recipient passed to the notify service.",
@@ -58,7 +58,7 @@
         },
         "data_description": {
           "podcast": "Full xiaoyuzhoufm podcast URL or the 24-character podcast ID used to fetch the latest episode.",
-          "title_prefix": "Episode prefix; the latest episode is matched by \"<prefix>-YY-MM-DD\", e.g. \"AI早知道\".",
+          "title_prefix": "Episode prefix; the latest episode is matched by \"prefix-YY-MM-DD\", e.g. \"AI早知道\".",
           "media_player": "Where the podcast is played. Skipped with a notice when unavailable/unknown.",
           "notify_service": "Optional, e.g. notify.wework. Used for \"no new episode\", playback failures and continue-music results. Empty = HA persistent notification only.",
           "notify_target": "Optional target/recipient passed to the notify service.",
@@ -108,7 +108,7 @@
         },
         "data_description": {
           "podcast": "Full xiaoyuzhoufm podcast URL or the 24-character podcast ID used to fetch the latest episode.",
-          "title_prefix": "Episode prefix; the latest episode is matched by \"<prefix>-YY-MM-DD\", e.g. \"AI早知道\".",
+          "title_prefix": "Episode prefix; the latest episode is matched by \"prefix-YY-MM-DD\", e.g. \"AI早知道\".",
           "media_player": "Where the podcast is played. Skipped with a notice when unavailable/unknown.",
           "notify_service": "Optional, e.g. notify.wework. Used for \"no new episode\", playback failures and continue-music results. Empty = HA persistent notification only.",
           "notify_target": "Optional target/recipient passed to the notify service.",
