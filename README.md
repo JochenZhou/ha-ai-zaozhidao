@@ -72,9 +72,16 @@
 > 目标播放器 `unavailable`/`unknown` 时，集成不会假装播放成功，而是跳过播放并发送提醒。
 >
 > **播完续播**：播放开始后在目标播放器上挂一个监听，播放状态从 `playing` 落到 `idle`/`off`
-> 且已播时长 ≥ 音频时长的 80% 时，调 `music_assistant.get_library(order_by=random)` 取曲目、
-> 再用 `music_assistant.play_media` 接着放。手动提前停止不算播完；中途切到别的媒体会自动注销监听；
-> 监听最长存活 4 小时。MA 曲库为空或播放器不归 MA 管时会发提醒，不会静默失败。
+> 且已播时长（优先取播放器自报的 `media_position`）≥ 音频时长的 80% 时，调
+> `music_assistant.get_library(order_by=random)` 取曲目、再用 `music_assistant.play_media` 接着放。
+> 手动提前停止不算播完；中途切到别的媒体会自动注销监听；监听最长存活 4 小时。
+> MA 曲库为空或播放器不归 MA 管时会发提醒，不会静默失败。
+>
+> > 判断「是不是我们那一期」时不直接比字符串：MA 会把播放地址包成
+> > `builtin://sound_effect/<URL>` 并再做一次百分号编码，直接比较会导致刚开播就误判成
+> > 「用户切了别的媒体」而注销监听（v0.3.1 的 bug，v0.3.2 修复）。
+> > 排查时看 `sensor.*_latest_episode` 的属性：`continue_music` 是否开启、
+> > `active_watchers` 是否 ≥ 1（0 = 没挂上监听）。
 >
 > **无新一期时直接播音乐**：把这当「播客优先、音乐兜底」。当天没有新一期时不再只发提醒，
 > 而是直接用「续播曲目数」+「音乐播放器（MA）」随机放歌；失败了会明确告诉你原因。

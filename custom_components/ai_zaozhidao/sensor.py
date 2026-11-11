@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -47,6 +48,22 @@ class LatestTitleSensor(_Base):
     def __init__(self, coordinator, entry) -> None:
         super().__init__(coordinator, entry, "latest_title")
 
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass,
+                f"{DOMAIN}_watchers_{self._entry.entry_id}",
+                self._write_diag,
+            )
+        )
+
+    @callback
+    def _write_diag(self) -> None:
+        """续播监听变化时立即刷新属性，不用等 30 分钟轮询。"""
+        if self.hass is not None:
+            self.async_write_ha_state()
+
     @property
     def native_value(self) -> str | None:
         return (self.coordinator.data or {}).get("latest_title")
@@ -65,7 +82,17 @@ class LatestTitleSensor(_Base):
             "recent_titles": data.get("recent_titles"),
             "fetched_at": data.get("fetched_at"),
             "target_media_player": cfg.get("media_player"),
+            "continue_music": cfg.get("continue_music"),
+            "continue_player": cfg.get("continue_player") or cfg.get("media_player"),
+            "continue_tracks": cfg.get("continue_tracks"),
+            "music_when_empty": cfg.get("music_when_empty"),
+            "active_watchers": self._watcher_count(),
         }
+
+    def _watcher_count(self) -> int:
+        """当前挂着的「播完续播」监听数量（0 = 没挂上）。"""
+        store = self.coordinator.hass.data.get(DOMAIN, {}).get(self._entry.entry_id, {})
+        return sum(1 for w in store.get("watchers", []) if not w.is_done)
 
 
 class LatestDateSensor(_Base):

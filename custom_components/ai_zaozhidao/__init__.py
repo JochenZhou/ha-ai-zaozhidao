@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse, cal
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.typing import ConfigType
 
 from .api import extract_podcast_id
@@ -299,6 +300,8 @@ async def async_play(
 
     if data.get(CONF_CONTINUE_MUSIC):
         _async_watch_for_continue(hass, data, coordinator, media_player, media_url, episode)
+    else:
+        _LOGGER.info("播完续播未开启（选项「播完续播随机音乐」为关），本次不挂监听")
     return f"已播放 {episode.title}"
 
 
@@ -320,18 +323,35 @@ def _async_watch_for_continue(
 
     # 先清掉同一播放器上残留的监听
     _async_cancel_watchers(hass, data, media_player)
+    watcher_count = int(data.get(CONF_CONTINUE_TRACKS) or DEFAULT_CONTINUE_TRACKS)
     watcher = ContinueMusicWatcher(
         hass,
         entity_id=media_player,
         media_content_id=media_url,
         expected_duration=float(getattr(episode, "duration", 0) or 0),
-        count=int(data.get(CONF_CONTINUE_TRACKS) or DEFAULT_CONTINUE_TRACKS),
+        count=watcher_count,
         target=target,
         notify=_notify,
+        on_change=lambda: _ping_diag(hass, data),
     )
     watcher.async_start()
     data.setdefault("watchers", []).append(watcher)
-    _LOGGER.debug("已注册播完续播监听: %s -> %s", media_player, target)
+    _ping_diag(hass, data)
+    _LOGGER.info(
+        "已挂播完续播监听: %s -> %s（%s 首，时长 %ss）",
+        media_player,
+        target,
+        watcher_count,
+        int(float(getattr(episode, "duration", 0) or 0)),
+    )
+
+
+@callback
+def _ping_diag(hass: HomeAssistant, data: dict) -> None:
+    """续播监听状态变化时刷新诊断属性。"""
+    entry = data.get("entry")
+    entry_id = getattr(entry, "entry_id", "")
+    async_dispatcher_send(hass, f"{DOMAIN}_watchers_{entry_id}")
 
 
 @callback
@@ -344,6 +364,7 @@ def _async_cancel_watchers(hass: HomeAssistant, data: dict, media_player: str | 
         else:
             keep.append(watcher)
     data["watchers"] = keep
+    _ping_diag(hass, data)
 
 
 async def _play_music_instead(
